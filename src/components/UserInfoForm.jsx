@@ -22,7 +22,7 @@ export default function UserInfoForm({ onSubmit, reward }) {
         You&#39;ve selected: {reward.title} ({reward.value})
       </p>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
+        {/* <div>
           <Label htmlFor="name">Name</Label>
           <Input
             id="name"
@@ -31,7 +31,7 @@ export default function UserInfoForm({ onSubmit, reward }) {
             onChange={(e) => setName(e.target.value)}
             required
           />
-        </div>
+        </div> */}
         <div>
           <Label htmlFor="email">Email</Label>
           <Input
@@ -42,7 +42,7 @@ export default function UserInfoForm({ onSubmit, reward }) {
             required
           />
         </div>
-        <div>
+        {/* <div>
           <Label htmlFor="phone">Phone Number</Label>
           <Input
             id="phone"
@@ -51,7 +51,7 @@ export default function UserInfoForm({ onSubmit, reward }) {
             onChange={(e) => setPhone(e.target.value)}
             required
           />
-        </div>
+        </div> */}
         <Button type="submit">Submit</Button>
       </form>
     </div>
