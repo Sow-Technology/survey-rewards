@@ -18,9 +18,7 @@ export default function UserInfoForm({ onSubmit, reward }) {
       <h2 className="text-2xl font-bold mb-4 text-indigo-700">
         Enter Your Information
       </h2>
-      <p className="mb-4">
-        You&#39;ve selected: {reward.title} ({reward.value})
-      </p>
+      <p className="mb-4">You&#39;ve selected: {reward.title}</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* <div>
           <Label htmlFor="name">Name</Label>

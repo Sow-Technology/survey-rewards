@@ -4,10 +4,12 @@ import Survey from "../components/Survey";
 import RewardSelection from "../components/RewardSelection";
 import UserInfoForm from "../components/UserInfoForm";
 import SuccessMessage from "../components/SuccessMessage";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function Main() {
   const [currentSet, setCurrentSet] = useState(0);
-  const [showReward, setShowReward] = useState(true);
+  const [showReward, setShowReward] = useState(false);
   const [selectedReward, setSelectedReward] = useState(null);
   const [showUserForm, setShowUserForm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -29,6 +31,9 @@ export default function Main() {
   console.log(answers);
 
   const handleUserInfoSubmit = async (userInfo) => {
+    toast.loading("Submitting...", {
+      id: "submit",
+    });
     try {
       const response = await fetch("/api/submit-survey", {
         method: "POST",
@@ -43,8 +48,14 @@ export default function Main() {
       });
 
       if (response.ok) {
+        toast.success("Submitted!", {
+          id: "submit",
+        });
         setShowSuccess(true);
       } else {
+        toast.error("Failed to submit survey", {
+          id: "submit",
+        });
         throw new Error("Failed to submit survey");
       }
     } catch (error) {
@@ -52,9 +63,9 @@ export default function Main() {
       alert("Failed to submit survey. Please try again.");
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-400 to-indigo-600 flex items-center justify-center p-4">
+      <Toaster position="top-center" />
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-4xl w-full">
         {!showReward && !showUserForm && !showSuccess && (
           <Survey
