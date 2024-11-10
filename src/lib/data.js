@@ -40,10 +40,17 @@ export const surveyQuestions = [
   ],
   [
     {
+      id: 11,
+      question:
+        "Does your child spend most of their free time on screens (e.g., watching TV, playing video games, using tablets or smartphones)?",
+      type: "mcq",
+      options: ["Yes, frequently", "Sometimes", "Rarely", "No"],
+    },
+    {
       id: 10,
       question:
         "What types of activities does your child enjoy the most? (Select all that apply)",
-      type: "mcq",
+      type: "multi-select",
       options: [
         "Building with blocks or Lego",
         "Outdoor activities (e.g., sports, cycling)",
@@ -51,13 +58,6 @@ export const surveyQuestions = [
         "Reading books or storytelling",
         "Other",
       ],
-    },
-    {
-      id: 11,
-      question:
-        "Does your child spend most of their free time on screens (e.g., watching TV, playing video games, using tablets or smartphones)?",
-      type: "mcq",
-      options: ["Yes, frequently", "Sometimes", "Rarely", "No"],
     },
     {
       id: 12,
@@ -87,7 +87,7 @@ export const surveyQuestions = [
       id: 14,
       question:
         "What skills would you like your child to develop through play-based learning? (Select all that apply)",
-      type: "mcq",
+      type: "multi-select",
       options: [
         "Problem-Solving",
         "Creativity and Independent Thinking",

@@ -2,22 +2,60 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils"; // Assuming you have a utility for class names
 
 export default function Survey({ questionSet, onNext, progress }) {
   const [answers, setAnswers] = useState({});
-  console.log(answers);
+  const [errors, setErrors] = useState({}); // For tracking errors
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onNext(answers);
-    setAnswers({});
+
+    // Validate answers before submitting
+    const newErrors = {};
+    questionSet.forEach((question) => {
+      if (question.type === "mcq" && !answers[question.id]) {
+        newErrors[question.id] = "Please select an option.";
+      }
+      if (
+        question.type === "multi-select" &&
+        (!answers[question.id] || answers[question.id].length === 0)
+      ) {
+        newErrors[question.id] = "Please select at least one option.";
+      }
+    });
+
+    // If no errors, proceed
+    if (Object.keys(newErrors).length === 0) {
+      onNext(answers);
+      setAnswers({});
+      setErrors({});
+    } else {
+      // If there are errors, set error messages
+      setErrors(newErrors);
+    }
   };
 
   const handleAnswerChange = (id, value) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleMultiSelectChange = (id, option, isChecked) => {
+    setAnswers((prev) => {
+      const currentAnswers = prev[id] ? [...prev[id]] : [];
+      if (isChecked) {
+        return { ...prev, [id]: [...currentAnswers, option] };
+      } else {
+        return {
+          ...prev,
+          [id]: currentAnswers.filter((item) => item !== option),
+        };
+      }
+    });
   };
 
   const renderQuestionInput = (question) => {
@@ -43,22 +81,124 @@ export default function Survey({ questionSet, onNext, progress }) {
         );
       case "mcq":
         return (
-          <RadioGroup
-            onValueChange={(value) => handleAnswerChange(question.id, value)}
-            required
-          >
-            {question.options.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
+          <div>
+            <RadioGroup
+              value={
+                answers[question.id]?.startsWith("Other:")
+                  ? "other"
+                  : answers[question.id]
+              }
+              onValueChange={(value) => {
+                if (value !== "other") {
+                  handleAnswerChange(question.id, value);
+                } else {
+                  handleAnswerChange(question.id, "Other:");
+                }
+              }}
+              required
+            >
+              {question.options.map((option, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value={option}
+                    id={`q${question.id}-option-${index}`}
+                  />
+                  <Label htmlFor={`q${question.id}-option-${index}`}>
+                    {option}
+                  </Label>
+                </div>
+              ))}
+              {/* Render "Other" option */}
+              <div className="flex items-center space-x-2">
                 <RadioGroupItem
-                  value={option}
+                  value="other"
+                  id={`q${question.id}-option-other`}
+                />
+                <Label htmlFor={`q${question.id}-option-other`}>Other</Label>
+                {answers[question.id]?.startsWith("Other:") && (
+                  <Input
+                    type="text"
+                    value={answers[question.id].slice(6)}
+                    onChange={(e) => {
+                      const otherValue = e.target.value;
+                      handleAnswerChange(question.id, `Other:${otherValue}`);
+                    }}
+                    placeholder="Please specify"
+                    required
+                  />
+                )}
+              </div>
+            </RadioGroup>
+            {errors[question.id] && (
+              <p className="text-red-500">{errors[question.id]}</p>
+            )}
+          </div>
+        );
+      case "multi-select":
+        return (
+          <div className="space-y-2">
+            {question.options.map((option, index) => (
+              <div
+                key={index}
+                className={cn(
+                  "flex items-center space-x-2",
+                  option === "Other" && "hidden"
+                )}
+              >
+                <Checkbox
                   id={`q${question.id}-option-${index}`}
+                  checked={answers[question.id]?.includes(option) || false}
+                  onCheckedChange={(checked) => {
+                    handleMultiSelectChange(question.id, option, checked);
+                  }}
                 />
                 <Label htmlFor={`q${question.id}-option-${index}`}>
                   {option}
                 </Label>
               </div>
             ))}
-          </RadioGroup>
+            {/* Render "Other" option */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id={`q${question.id}-option-other`}
+                checked={answers[question.id]?.some((item) =>
+                  item.startsWith("Other:")
+                )}
+                onCheckedChange={(checked) => {
+                  handleMultiSelectChange(question.id, "Other:", checked);
+                }}
+              />
+              <Label htmlFor={`q${question.id}-option-other`}>Other</Label>
+              {answers[question.id]?.some((item) =>
+                item.startsWith("Other:")
+              ) && (
+                <Input
+                  type="text"
+                  value={
+                    answers[question.id]
+                      ?.find((item) => item.startsWith("Other:"))
+                      ?.slice(6) || ""
+                  }
+                  onChange={(e) => {
+                    const otherValue = e.target.value;
+                    setAnswers((prev) => {
+                      const updatedAnswers = (prev[question.id] || []).map(
+                        (item) =>
+                          item.startsWith("Other:")
+                            ? `Other:${otherValue}`
+                            : item
+                      );
+                      return { ...prev, [question.id]: updatedAnswers };
+                    });
+                  }}
+                  placeholder="Please specify"
+                />
+              )}
+            </div>
+            {errors[question.id] && (
+              <p className="text-red-500">{errors[question.id]}</p>
+            )}
+          </div>
         );
       default:
         return null;
