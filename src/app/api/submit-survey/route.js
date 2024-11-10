@@ -14,7 +14,6 @@ const auth = new google.auth.JWT(
 
 export async function POST(req) {
   try {
-    console.log(auth);
     const { answers, userInfo, reward } = await req.json(); // Parse JSON body from request
 
     // Validate the incoming data
@@ -25,8 +24,11 @@ export async function POST(req) {
       });
     }
 
-    // Flatten the answers object into an array
-    const answerValues = Object.values(answers);
+    // Flatten the answers object into an array, handling arrays by joining them with a delimiter
+    const answerValues = Object.values(answers).map((answer) =>
+      Array.isArray(answer) ? answer.join(", ") : answer
+    );
+
     console.log("answer", answers);
     console.log("val", answerValues);
 
